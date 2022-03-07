@@ -8,46 +8,81 @@ import (
 
 var testKey = "dummy"
 
+func getTestDB() *FlashDB {
+	db, _ := New(DefaultConfig())
+	return db
+}
+
 func TestFlashDB_HGetSet(t *testing.T) {
-
 	db := getTestDB()
-	db.HSet(testKey, "bar", "1")
-	db.HSet(testKey, "baz", "2")
+	if err := db.Update(func(tx *Tx) error {
+		tx.HSet(testKey, "bar", "1")
+		tx.HSet(testKey, "baz", "2")
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-	val := db.HGet(testKey, "bar")
-	assert.Equal(t, "1", val)
-	val = db.HGet(testKey, "baz")
-	assert.Equal(t, "2", val)
-
+	db.View(func(tx *Tx) error {
+		val := tx.HGet(testKey, "bar")
+		assert.Equal(t, "1", val)
+		val = tx.HGet(testKey, "baz")
+		assert.Equal(t, "2", val)
+		return nil
+	})
 }
 
 func TestFlashDB_HGetAll(t *testing.T) {
 	db := getTestDB()
-	db.HSet(testKey, "bar", "1")
-	db.HSet(testKey, "baz", "2")
+	if err := db.Update(func(tx *Tx) error {
+		tx.HSet(testKey, "bar", "1")
+		tx.HSet(testKey, "baz", "2")
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-	values := db.HGetAll(testKey)
-	assert.Equal(t, 4, len(values))
+	db.View(func(tx *Tx) error {
+		values := tx.HGetAll(testKey)
+		assert.Equal(t, 4, len(values))
+		return nil
+	})
 }
 
 func TestFlashDB_HDel(t *testing.T) {
 	db := getTestDB()
-	db.HSet(testKey, "bar", "1")
-	db.HSet(testKey, "baz", "2")
+	if err := db.Update(func(tx *Tx) error {
+		tx.HSet(testKey, "bar", "1")
+		tx.HSet(testKey, "baz", "2")
+		res, err := tx.HDel(testKey, "bar", "baz")
+		assert.Nil(t, err)
+		assert.Equal(t, 2, res)
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-	res, err := db.HDel(testKey, "bar", "baz")
-	assert.Nil(t, err)
-	assert.Equal(t, 2, res)
-	assert.Empty(t, db.HGet(testKey, "bar"))
-	assert.Empty(t, db.HGet(testKey, "baz"))
+	db.View(func(tx *Tx) error {
+		assert.Empty(t, tx.HGet(testKey, "bar"))
+		assert.Empty(t, tx.HGet(testKey, "baz"))
+		return nil
+	})
 }
 
 func TestFlashDB_HExists(t *testing.T) {
 	db := getTestDB()
-	db.HSet(testKey, "bar", "1")
-	db.HSet(testKey, "baz", "2")
+	if err := db.Update(func(tx *Tx) error {
+		tx.HSet(testKey, "bar", "1")
+		tx.HSet(testKey, "baz", "2")
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-	assert.True(t, db.HExists(testKey, "bar"))
-	assert.True(t, db.HExists(testKey, "baz"))
-	assert.False(t, db.HExists(testKey, "ben"))
+	db.View(func(tx *Tx) error {
+		assert.True(t, tx.HExists(testKey, "bar"))
+		assert.True(t, tx.HExists(testKey, "baz"))
+		assert.False(t, tx.HExists(testKey, "ben"))
+		return nil
+	})
 }

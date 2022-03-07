@@ -34,27 +34,36 @@ func BenchmarkFlashDB_Set(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		err := db.Set(newKey(i), randomValue())
-		if err != nil {
-			panic(err)
-		}
+		db.View(func(tx *Tx) error {
+			err := tx.Set(newKey(i), randomValue())
+			if err != nil {
+				panic(err)
+			}
+			return nil
+		})
 	}
 }
 
 func BenchmarkFlashDB_Get(b *testing.B) {
 	db := getTestDB()
 
-	for i := 0; i < b.N; i++ {
-		db.Set(newKey(i), randomValue())
-	}
+	db.View(func(tx *Tx) error {
+		for i := 0; i < b.N; i++ {
+			tx.Set(newKey(i), randomValue())
+		}
+		return nil
+	})
 
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		_, err := db.Get(newKey(i))
-		if err != nil && err != ErrInvalidKey {
-			panic(err)
-		}
+		db.View(func(tx *Tx) error {
+			_, err := tx.Get(newKey(i))
+			if err != nil && err != ErrInvalidKey {
+				panic(err)
+			}
+			return nil
+		})
 	}
 }
 
@@ -65,29 +74,38 @@ func BenchmarkFlashDB_HSet(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, err := db.HSet(newKey(i), randomValue(), randomValue())
-		if err != nil {
-			panic(err)
-		}
+		db.View(func(tx *Tx) error {
+			_, err := tx.HSet(newKey(i), randomValue(), randomValue())
+			if err != nil {
+				panic(err)
+			}
+			return nil
+		})
 	}
 }
 
 func BenchmarkFlashDB_HGet(b *testing.B) {
 	db := getTestDB()
 
-	for i := 0; i < b.N; i++ {
-		_, err := db.HSet(newKey(i), newValue(i), randomValue())
-		if err != nil {
-			panic(err)
+	db.View(func(tx *Tx) error {
+		for i := 0; i < b.N; i++ {
+			_, err := tx.HSet(newKey(i), newValue(i), randomValue())
+			if err != nil {
+				panic(err)
+			}
 		}
-	}
+		return nil
+	})
 
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		val := db.HGet(newKey(i), newValue(i))
-		if val == "" {
-			panic("empty value")
-		}
+		db.View(func(tx *Tx) error {
+			val := tx.HGet(newKey(i), newValue(i))
+			if val == "" {
+				panic("empty value")
+			}
+			return nil
+		})
 	}
 }

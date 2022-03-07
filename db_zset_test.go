@@ -17,17 +17,23 @@ func TestRoseDB_ZSet(t *testing.T) {
 	}
 	defer l.Close()
 	db.log = l
+	db.persist = true
 	defer os.RemoveAll("tmp/")
 
-	err = db.ZAdd(testKey, 1, "foo")
-	assert.NoError(t, err)
-	err = db.ZAdd(testKey, 2, "bar")
-	assert.NoError(t, err)
-	err = db.ZAdd(testKey, 3, "baz")
-	assert.NoError(t, err)
+	if err := db.Update(func(tx *Tx) error {
+		err = tx.ZAdd(testKey, 1, "foo")
+		assert.NoError(t, err)
+		err = tx.ZAdd(testKey, 2, "bar")
+		assert.NoError(t, err)
+		err = tx.ZAdd(testKey, 3, "baz")
+		assert.NoError(t, err)
 
-	_, s := db.ZScore(testKey, "foo")
-	assert.Equal(t, 1.0, s)
+		_, s := tx.ZScore(testKey, "foo")
+		assert.Equal(t, 1.0, s)
 
-	assert.Equal(t, 3, db.ZCard(testKey))
+		assert.Equal(t, 3, tx.ZCard(testKey))
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 }

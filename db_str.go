@@ -5,14 +5,12 @@ import (
 	"time"
 )
 
-func (db *FlashDB) Set(key string, value string) error {
+func (tx *Tx) Set(key string, value string) error {
 
 	e := newRecord([]byte(key), []byte(value), StringRecord, StringSet)
-	if err := db.write(e); err != nil {
-		return err
-	}
+	tx.addRecord(e)
 
-	err := db.set(key, value)
+	err := tx.set(key, value)
 	if err != nil {
 		return err
 	}
@@ -20,34 +18,26 @@ func (db *FlashDB) Set(key string, value string) error {
 	return nil
 }
 
-func (db *FlashDB) SetEx(key string, value string, duration int64) (err error) {
+func (tx *Tx) SetEx(key string, value string, duration int64) (err error) {
 	if duration <= 0 {
 		return ErrInvalidTTL
 	}
 
-	db.strStore.Lock()
-	defer db.strStore.Unlock()
-
 	ttl := time.Now().Unix() + duration
 	e := newRecordWithExpire([]byte(key), []byte(value), ttl, StringRecord, StringExpire)
-	if err := db.write(e); err != nil {
-		return err
-	}
+	tx.addRecord(e)
 
-	if err = db.set(key, value); err != nil {
+	if err = tx.set(key, value); err != nil {
 		return
 	}
 
 	// set expired info.
-	db.setTTL(String, key, ttl)
+	tx.db.setTTL(String, key, ttl)
 	return
 }
 
-func (db *FlashDB) Get(key string) (val string, err error) {
-	db.strStore.RLock()
-	defer db.strStore.RUnlock()
-
-	val, err = db.get(key)
+func (tx *Tx) Get(key string) (val string, err error) {
+	val, err = tx.get(key)
 	if err != nil {
 		return
 	}
@@ -55,68 +45,53 @@ func (db *FlashDB) Get(key string) (val string, err error) {
 	return
 }
 
-func (db *FlashDB) Delete(key string) error {
-	db.strStore.Lock()
-	defer db.strStore.Unlock()
+func (tx *Tx) Delete(key string) error {
 
 	e := newRecord([]byte(key), nil, StringRecord, StringRem)
-	if err := db.write(e); err != nil {
-		return err
-	}
+	tx.addRecord(e)
 
-	db.strStore.Delete(key)
-	db.exps.HDel(String, key)
+	tx.db.strStore.Delete(key)
+	tx.db.exps.HDel(String, key)
 	return nil
 }
 
-func (db *FlashDB) Expire(key string, duration int64) (err error) {
+func (tx *Tx) Expire(key string, duration int64) (err error) {
 	if duration <= 0 {
 		return ErrInvalidTTL
 	}
 
-	db.strStore.Lock()
-	defer db.strStore.Unlock()
-
-	if _, err = db.get(key); err != nil {
+	if _, err = tx.get(key); err != nil {
 		return
 	}
 
 	ttl := time.Now().Unix() + duration
 	e := newRecordWithExpire([]byte(key), nil, ttl, StringRecord, StringExpire)
-	if err := db.write(e); err != nil {
-		return err
-	}
+	tx.addRecord(e)
 
-	db.setTTL(String, key, ttl)
+	tx.db.setTTL(String, key, ttl)
 	return
 }
 
-func (db *FlashDB) TTL(key string) (ttl int64) {
+func (tx *Tx) TTL(key string) (ttl int64) {
 
-	db.strStore.Lock()
-	defer db.strStore.Unlock()
-
-	deadline := db.getTTL(String, key)
+	deadline := tx.db.getTTL(String, key)
 	if deadline == nil {
 		return
 	}
 
-	if db.hasExpired(key, String) {
-		db.evict(key, String)
+	if tx.db.hasExpired(key, String) {
+		tx.db.evict(key, String)
 		return
 	}
 
 	return deadline.(int64) - time.Now().Unix()
 }
 
-func (db *FlashDB) Exists(key string) bool {
-	db.strStore.RLock()
-	defer db.strStore.RUnlock()
-
-	_, err := db.strStore.get(key)
+func (tx *Tx) Exists(key string) bool {
+	_, err := tx.db.strStore.get(key)
 	if err != nil {
 		if err == ErrExpiredKey {
-			db.evict(key, String)
+			tx.db.evict(key, String)
 		}
 		return false
 	}
@@ -124,9 +99,9 @@ func (db *FlashDB) Exists(key string) bool {
 	return true
 }
 
-func (db *FlashDB) set(key string, value string) error {
+func (tx *Tx) set(key string, value string) error {
 	var existVal string
-	existVal, err := db.get(key)
+	existVal, err := tx.get(key)
 	if err != nil && err != ErrExpiredKey && err != ErrInvalidKey {
 		return err
 	}
@@ -135,20 +110,20 @@ func (db *FlashDB) set(key string, value string) error {
 		return err
 	}
 
-	db.strStore.Set(key, value)
+	tx.db.strStore.Set(key, value)
 
 	return nil
 }
 
-func (db *FlashDB) get(key string) (val string, err error) {
-	v, err := db.strStore.get(key)
+func (tx *Tx) get(key string) (val string, err error) {
+	v, err := tx.db.strStore.get(key)
 	if err != nil {
 		return "", err
 	}
 
 	// Check if the key is expired.
-	if db.hasExpired(key, String) {
-		db.evict(key, String)
+	if tx.db.hasExpired(key, String) {
+		tx.db.evict(key, String)
 		return "", ErrExpiredKey
 	}
 

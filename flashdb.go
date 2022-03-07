@@ -10,9 +10,12 @@ import (
 )
 
 var (
-	ErrInvalidKey = errors.New("invalid key")
-	ErrInvalidTTL = errors.New("invalid ttl")
-	ErrExpiredKey = errors.New("key has expired")
+	ErrInvalidKey     = errors.New("invalid key")
+	ErrInvalidTTL     = errors.New("invalid ttl")
+	ErrExpiredKey     = errors.New("key has expired")
+	ErrTxClosed       = errors.New("tx closed")
+	ErrDatabaseClosed = errors.New("database closed")
+	ErrTxNotWritable  = errors.New("tx not writable")
 )
 
 type (
@@ -21,6 +24,9 @@ type (
 		config *Config
 		exps   *hash.Hash // hashmap of ttl keys
 		log    *aol.Log
+
+		closed  bool // set when the database has been closed
+		persist bool // do we write to disk
 
 		strStore  *strStore
 		hashStore *hashStore
@@ -57,7 +63,8 @@ func New(config *Config) (*FlashDB, error) {
 		}
 	}
 
-	if config.Path != "" {
+	db.persist = config.Path != ""
+	if db.persist {
 		l, err := aol.Open(config.Path, nil)
 		if err != nil {
 			return nil, err
@@ -126,6 +133,7 @@ func (db *FlashDB) evict(key string, dType DataType) {
 }
 
 func (db *FlashDB) Close() error {
+	db.closed = true
 	for _, evictor := range db.evictors {
 		evictor.stop()
 	}

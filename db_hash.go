@@ -5,46 +5,41 @@ import (
 	"time"
 )
 
-func (db *FlashDB) HSet(key string, field string, value string) (res int, err error) {
-	existVal := db.HGet(key, field)
+func (tx *Tx) HSet(key string, field string, value string) (res int, err error) {
+	existVal := tx.HGet(key, field)
 	if reflect.DeepEqual(existVal, value) {
 		return
 	}
 
-	db.hashStore.Lock()
-	defer db.hashStore.Unlock()
-
 	e := newRecordWithValue([]byte(key), []byte(field), []byte(value), HashRecord, HashHSet)
-	if err = db.write(e); err != nil {
-		return
-	}
+	tx.addRecord(e)
 
-	res = db.hashStore.HSet(key, field, value)
+	res = tx.db.hashStore.HSet(key, field, value)
 	return
 }
 
-func (db *FlashDB) HGet(key string, field string) string {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HGet(key string, field string) string {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return ""
 	}
 
-	return toString(db.hashStore.HGet(key, field))
+	return toString(tx.db.hashStore.HGet(key, field))
 }
 
-func (db *FlashDB) HGetAll(key string) []string {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HGetAll(key string) []string {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return nil
 	}
 
-	vals := db.hashStore.HGetAll(key)
+	vals := tx.db.hashStore.HGetAll(key)
 	values := make([]string, 0, 1)
 
 	for _, v := range vals {
@@ -54,15 +49,14 @@ func (db *FlashDB) HGetAll(key string) []string {
 	return values
 }
 
-func (db *FlashDB) HDel(key string, field ...string) (res int, err error) {
-	db.hashStore.Lock()
-	defer db.hashStore.Unlock()
+func (tx *Tx) HDel(key string, field ...string) (res int, err error) {
 
 	for _, f := range field {
-		if ok := db.hashStore.HDel(key, f); ok == 1 {
+		if ok := tx.db.hashStore.HDel(key, f); ok == 1 {
 			e := newRecord([]byte(key), nil, HashRecord, HashHDel)
-			if err = db.write(e); err != nil {
-				return
+			if tx.db.persist {
+				tx.wc.rollbackItems = append(tx.wc.rollbackItems, e)
+				tx.wc.commitItems = append(tx.wc.commitItems, e)
 			}
 			res++
 		}
@@ -70,63 +64,63 @@ func (db *FlashDB) HDel(key string, field ...string) (res int, err error) {
 	return
 }
 
-func (db *FlashDB) HKeyExists(key string) (ok bool) {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HKeyExists(key string) (ok bool) {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return
 	}
-	return db.hashStore.HKeyExists(key)
+	return tx.db.hashStore.HKeyExists(key)
 }
 
-func (db *FlashDB) HExists(key, field string) (ok bool) {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HExists(key, field string) (ok bool) {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return
 	}
 
-	return db.hashStore.HExists(key, field)
+	return tx.db.hashStore.HExists(key, field)
 }
 
-func (db *FlashDB) HLen(key string) int {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HLen(key string) int {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return 0
 	}
 
-	return db.hashStore.HLen(key)
+	return tx.db.hashStore.HLen(key)
 }
 
-func (db *FlashDB) HKeys(key string) (val []string) {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HKeys(key string) (val []string) {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return nil
 	}
 
-	return db.hashStore.HKeys(key)
+	return tx.db.hashStore.HKeys(key)
 }
 
-func (db *FlashDB) HVals(key string) (values []string) {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HVals(key string) (values []string) {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return nil
 	}
 
-	vals := db.hashStore.HVals(key)
+	vals := tx.db.hashStore.HVals(key)
 	for _, v := range vals {
 		values = append(values, toString(v))
 	}
@@ -134,56 +128,48 @@ func (db *FlashDB) HVals(key string) (values []string) {
 	return
 }
 
-func (db *FlashDB) HExpire(key string, duration int64) (err error) {
+func (tx *Tx) HExpire(key string, duration int64) (err error) {
 	if duration <= 0 {
 		return ErrInvalidTTL
 	}
 
-	if !db.HKeyExists(key) {
+	if !tx.HKeyExists(key) {
 		return ErrInvalidKey
 	}
 
-	db.hashStore.Lock()
-	defer db.hashStore.Unlock()
-
 	ttl := time.Now().Unix() + duration
 
-	db.setTTL(Hash, key, ttl)
+	tx.db.setTTL(Hash, key, ttl)
 	return
 }
 
-func (db *FlashDB) HTTL(key string) (ttl int64) {
-	db.hashStore.RLock()
-	defer db.hashStore.RUnlock()
+func (tx *Tx) HTTL(key string) (ttl int64) {
+	tx.db.hashStore.RLock()
+	defer tx.db.hashStore.RUnlock()
 
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return
 	}
 
-	deadline := db.getTTL(Hash, key)
+	deadline := tx.db.getTTL(Hash, key)
 	if deadline == nil {
 		return
 	}
 	return deadline.(int64) - time.Now().Unix()
 }
 
-func (db *FlashDB) HClear(key string) (err error) {
-	if db.hasExpired(key, Hash) {
-		db.evict(key, Hash)
+func (tx *Tx) HClear(key string) (err error) {
+	if tx.db.hasExpired(key, Hash) {
+		tx.db.evict(key, Hash)
 		return
 	}
 
-	db.hashStore.Lock()
-	defer db.hashStore.Unlock()
-
 	e := newRecord([]byte(key), nil, HashRecord, HashHClear)
-	if err := db.write(e); err != nil {
-		return err
-	}
+	tx.addRecord(e)
 
-	db.hashStore.HClear(key)
-	db.exps.HDel(Hash, key)
+	tx.db.hashStore.HClear(key)
+	tx.db.exps.HDel(Hash, key)
 	return
 }
 
