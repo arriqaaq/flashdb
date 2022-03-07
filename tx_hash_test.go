@@ -1,16 +1,21 @@
 package flashdb
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var testKey = "dummy"
+var (
+	testKey = "dummy"
+	tmpDir  = "tmp"
+)
 
 func testConfig() *Config {
 	return &Config{
 		Addr: DefaultAddr,
+		Path: tmpDir,
 	}
 }
 
@@ -21,9 +26,14 @@ func getTestDB() *FlashDB {
 
 func TestFlashDB_HGetSet(t *testing.T) {
 	db := getTestDB()
+	defer db.Close()
+	defer os.RemoveAll(tmpDir)
+
 	if err := db.Update(func(tx *Tx) error {
-		tx.HSet(testKey, "bar", "1")
-		tx.HSet(testKey, "baz", "2")
+		_, err := tx.HSet(testKey, "bar", "1")
+		assert.NoError(t, err)
+		_, err = tx.HSet(testKey, "baz", "2")
+		assert.NoError(t, err)
 		return nil
 	}); err != nil {
 		t.Fatal(err)
@@ -40,6 +50,9 @@ func TestFlashDB_HGetSet(t *testing.T) {
 
 func TestFlashDB_HGetAll(t *testing.T) {
 	db := getTestDB()
+	defer db.Close()
+	defer os.RemoveAll(tmpDir)
+
 	if err := db.Update(func(tx *Tx) error {
 		tx.HSet(testKey, "bar", "1")
 		tx.HSet(testKey, "baz", "2")
@@ -57,6 +70,9 @@ func TestFlashDB_HGetAll(t *testing.T) {
 
 func TestFlashDB_HDel(t *testing.T) {
 	db := getTestDB()
+	defer db.Close()
+	defer os.RemoveAll(tmpDir)
+
 	if err := db.Update(func(tx *Tx) error {
 		tx.HSet(testKey, "bar", "1")
 		tx.HSet(testKey, "baz", "2")
@@ -77,6 +93,9 @@ func TestFlashDB_HDel(t *testing.T) {
 
 func TestFlashDB_HExists(t *testing.T) {
 	db := getTestDB()
+	defer db.Close()
+	defer os.RemoveAll(tmpDir)
+
 	if err := db.Update(func(tx *Tx) error {
 		tx.HSet(testKey, "bar", "1")
 		tx.HSet(testKey, "baz", "2")

@@ -72,9 +72,11 @@ func (db *FlashDB) buildStringRecord(r *record) error {
 		db.strStore.Set(key, member)
 	case StringRem:
 		db.strStore.Delete(key)
+		db.exps.HDel(String, key)
 	case StringExpire:
 		if r.timestamp < uint64(time.Now().Unix()) {
 			db.strStore.Delete(key)
+			db.exps.HDel(String, key)
 		} else {
 			db.setTTL(String, key, int64(r.timestamp))
 		}
@@ -96,9 +98,11 @@ func (db *FlashDB) buildHashRecord(r *record) error {
 		db.hashStore.HDel(key, member)
 	case HashHClear:
 		db.hashStore.HClear(key)
+		db.exps.HDel(Hash, key)
 	case HashHExpire:
 		if r.timestamp < uint64(time.Now().Unix()) {
 			db.hashStore.HClear(key)
+			db.exps.HDel(Hash, key)
 		} else {
 			db.setTTL(Hash, key, int64(r.timestamp))
 		}
@@ -122,9 +126,11 @@ func (db *FlashDB) buildSetRecord(r *record) error {
 		db.setStore.SMove(key, value, member)
 	case SetSClear:
 		db.setStore.SClear(key)
+		db.exps.HDel(Set, key)
 	case SetSExpire:
 		if r.timestamp < uint64(time.Now().Unix()) {
 			db.setStore.SClear(key)
+			db.exps.HDel(Set, key)
 		} else {
 			db.setTTL(Set, key, int64(r.timestamp))
 		}
@@ -150,9 +156,11 @@ func (db *FlashDB) buildZsetRecord(r *record) error {
 		db.zsetStore.ZRem(key, member)
 	case ZSetZClear:
 		db.zsetStore.ZClear(key)
+		db.exps.HDel(ZSet, key)
 	case ZSetZExpire:
 		if r.timestamp < uint64(time.Now().Unix()) {
 			db.zsetStore.ZClear(key)
+			db.exps.HDel(ZSet, key)
 		} else {
 			db.setTTL(ZSet, key, int64(r.timestamp))
 		}

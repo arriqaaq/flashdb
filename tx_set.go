@@ -4,32 +4,13 @@ import (
 	"time"
 )
 
-func (tx *Tx) SAdd(key string, members ...string) (res int, err error) {
+func (tx *Tx) SAdd(key string, members ...string) (err error) {
 	for _, m := range members {
 		exist := tx.db.setStore.SIsMember(key, m)
 		if !exist {
 			e := newRecord([]byte(key), []byte(m), SetRecord, SetSAdd)
-			if tx.db.persist {
-				tx.wc.rollbackItems = append(tx.wc.rollbackItems, e)
-				tx.wc.commitItems = append(tx.wc.commitItems, e)
-			}
-			res = tx.db.setStore.SAdd(key, m)
+			tx.addRecord(e)
 		}
-	}
-	return
-}
-
-func (tx *Tx) SPop(key string, count int) (values []string, err error) {
-	if tx.db.hasExpired(key, Set) {
-		tx.db.evict(key, Set)
-		return nil, ErrExpiredKey
-	}
-
-	vals := tx.db.setStore.SPop(key, count)
-	for _, v := range vals {
-		e := newRecord([]byte(key), []byte(toString(v)), SetRecord, SetSRem)
-		tx.addRecord(e)
-		values = append(values, toString(v))
 	}
 	return
 }
@@ -64,9 +45,7 @@ func (tx *Tx) SRem(key string, members ...string) (res int, err error) {
 	for _, m := range members {
 		e := newRecord([]byte(key), []byte(m), SetRecord, SetSRem)
 		tx.addRecord(e)
-		if ok := tx.db.setStore.SRem(key, m); ok {
-			res++
-		}
+		res++
 	}
 	return
 }
@@ -164,9 +143,6 @@ func (tx *Tx) SClear(key string) (err error) {
 
 	e := newRecord([]byte(key), nil, SetRecord, SetSClear)
 	tx.addRecord(e)
-
-	tx.db.setStore.SClear(key)
-	tx.db.exps.HDel(Set, key)
 	return
 }
 
@@ -182,8 +158,6 @@ func (tx *Tx) SExpire(key string, duration int64) (err error) {
 	ttl := time.Now().Unix() + duration
 	e := newRecordWithExpire([]byte(key), nil, ttl, SetRecord, SetSExpire)
 	tx.addRecord(e)
-
-	tx.db.setTTL(Set, key, ttl)
 	return
 }
 

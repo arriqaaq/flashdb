@@ -34,7 +34,7 @@ func BenchmarkFlashDB_Set(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		db.View(func(tx *Tx) error {
+		db.Update(func(tx *Tx) error {
 			err := tx.Set(newKey(i), randomValue())
 			if err != nil {
 				panic(err)
@@ -47,7 +47,7 @@ func BenchmarkFlashDB_Set(b *testing.B) {
 func BenchmarkFlashDB_Get(b *testing.B) {
 	db := getTestDB()
 
-	db.View(func(tx *Tx) error {
+	db.Update(func(tx *Tx) error {
 		for i := 0; i < b.N; i++ {
 			tx.Set(newKey(i), randomValue())
 		}
@@ -74,7 +74,7 @@ func BenchmarkFlashDB_HSet(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		db.View(func(tx *Tx) error {
+		db.Update(func(tx *Tx) error {
 			_, err := tx.HSet(newKey(i), randomValue(), randomValue())
 			if err != nil {
 				panic(err)
@@ -87,7 +87,7 @@ func BenchmarkFlashDB_HSet(b *testing.B) {
 func BenchmarkFlashDB_HGet(b *testing.B) {
 	db := getTestDB()
 
-	db.View(func(tx *Tx) error {
+	db.Update(func(tx *Tx) error {
 		for i := 0; i < b.N; i++ {
 			_, err := tx.HSet(newKey(i), newValue(i), randomValue())
 			if err != nil {

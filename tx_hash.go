@@ -13,8 +13,6 @@ func (tx *Tx) HSet(key string, field string, value string) (res int, err error) 
 
 	e := newRecordWithValue([]byte(key), []byte(field), []byte(value), HashRecord, HashHSet)
 	tx.addRecord(e)
-
-	res = tx.db.hashStore.HSet(key, field, value)
 	return
 }
 
@@ -52,14 +50,9 @@ func (tx *Tx) HGetAll(key string) []string {
 func (tx *Tx) HDel(key string, field ...string) (res int, err error) {
 
 	for _, f := range field {
-		if ok := tx.db.hashStore.HDel(key, f); ok == 1 {
-			e := newRecord([]byte(key), nil, HashRecord, HashHDel)
-			if tx.db.persist {
-				tx.wc.rollbackItems = append(tx.wc.rollbackItems, e)
-				tx.wc.commitItems = append(tx.wc.commitItems, e)
-			}
-			res++
-		}
+		e := newRecord([]byte(key), []byte(f), HashRecord, HashHDel)
+		tx.addRecord(e)
+		res++
 	}
 	return
 }
@@ -138,8 +131,9 @@ func (tx *Tx) HExpire(key string, duration int64) (err error) {
 	}
 
 	ttl := time.Now().Unix() + duration
+	e := newRecordWithExpire([]byte(key), nil, ttl, HashRecord, HashHExpire)
+	tx.addRecord(e)
 
-	tx.db.setTTL(Hash, key, ttl)
 	return
 }
 
@@ -167,9 +161,6 @@ func (tx *Tx) HClear(key string) (err error) {
 
 	e := newRecord([]byte(key), nil, HashRecord, HashHClear)
 	tx.addRecord(e)
-
-	tx.db.hashStore.HClear(key)
-	tx.db.exps.HDel(Hash, key)
 	return
 }
 

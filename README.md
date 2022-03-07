@@ -115,8 +115,16 @@ err := db.View(func(tx *flashdb.Tx) error {
 })
 ```
 
-Reference
-=========
+TODO
+====
+
+- Add more comprehensive unit test cases
+- Add more bench tests
+- Add explicit logging messages
+
+
+References
+==========
 
 FlashDB is inspired by NutsDB and BuntDB.
 

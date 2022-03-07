@@ -15,7 +15,7 @@ import (
 var commandList = [][]string{
 	{"SET", "key value", "STRING"},
 	{"GET", "key", "STRING"},
-	{"REMOVE", "key", "STRING"},
+	{"DELETE", "key", "STRING"},
 	{"EXPIRE", "key seconds", "STRING"},
 	{"TTL", "key", "STRING"},
 
@@ -30,7 +30,6 @@ var commandList = [][]string{
 	{"HCLEAR", "key field", "HASH"},
 
 	{"SADD", "key members [members...]", "SET"},
-	{"SPOP", "key count", "SET"},
 	{"SISMEMBER", "key member", "SET"},
 	{"SRANDMEMBER", "key count", "SET"},
 	{"SREM", "key members [members...]", "SET"},
@@ -46,7 +45,6 @@ var commandList = [][]string{
 	{"ZCARD", "key", "ZSET"},
 	{"ZRANK", "key member", "ZSET"},
 	{"ZREVRANK", "key member", "ZSET"},
-	{"ZINCRBY", "key increment member", "ZSET"},
 	{"ZRANGE", "key start stop", "ZSET"},
 	{"ZREVRANGE", "key start stop", "ZSET"},
 	{"ZREM", "key member", "ZSET"},

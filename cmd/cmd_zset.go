@@ -102,28 +102,6 @@ func zRevRank(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 	return
 }
 
-func zIncrBy(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
-	if len(args) != 3 {
-		err = newWrongNumOfArgsError("zincrby")
-		return
-	}
-	incr, err := strToFloat64(args[1])
-	if err != nil {
-		err = ErrSyntaxIncorrect
-		return
-	}
-
-	err = db.View(func(tx *flashdb.Tx) error {
-		var val float64
-		if val, err = tx.ZIncrBy(args[0], incr, args[2]); err == nil {
-			res = float64ToStr(val)
-		}
-		return nil
-	})
-
-	return
-}
-
 func zRange(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 	if len(args) != 3 && len(args) != 4 {
 		err = newWrongNumOfArgsError("zrange")
@@ -324,7 +302,6 @@ func init() {
 	addExecCommand("zcard", zCard)
 	addExecCommand("zrank", zRank)
 	addExecCommand("zrevrank", zRevRank)
-	addExecCommand("zincrby", zIncrBy)
 	addExecCommand("zrange", zRange)
 	addExecCommand("zrevrange", zRevRange)
 	addExecCommand("zrem", zRem)

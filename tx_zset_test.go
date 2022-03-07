@@ -10,6 +10,9 @@ import (
 
 func TestRoseDB_ZSet(t *testing.T) {
 	db := getTestDB()
+	defer db.Close()
+	defer os.RemoveAll(tmpDir)
+
 	logPath := "tmp/"
 	l, err := aol.Open(logPath, nil)
 	if err != nil {
@@ -28,6 +31,12 @@ func TestRoseDB_ZSet(t *testing.T) {
 		err = tx.ZAdd(testKey, 3, "baz")
 		assert.NoError(t, err)
 
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := db.View(func(tx *Tx) error {
 		_, s := tx.ZScore(testKey, "foo")
 		assert.Equal(t, 1.0, s)
 
@@ -36,4 +45,5 @@ func TestRoseDB_ZSet(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+
 }

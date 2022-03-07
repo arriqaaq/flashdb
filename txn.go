@@ -17,15 +17,13 @@ type Tx struct {
 }
 
 func (tx *Tx) addRecord(r *record) {
-	if tx.db.persist {
-		tx.wc.rollbackItems = append(tx.wc.rollbackItems, r)
+	if tx.db.persist && tx.writable {
 		tx.wc.commitItems = append(tx.wc.commitItems, r)
 	}
 }
 
 type txWriteContext struct {
-	rollbackItems []*record // details for rolling back tx.
-	commitItems   []*record // details for committing tx.
+	commitItems []*record // details for committing tx.
 }
 
 // lock locks the database based on the transaction type.
@@ -72,6 +70,69 @@ func (db *FlashDB) managed(writable bool, fn func(tx *Tx) error) (err error) {
 	return
 }
 
+// Begin opens a new transaction.
+// Multiple read-only transactions can be opened at the same time but there can
+// only be one read/write transaction at a time. Attempting to open a read/write
+// transactions while another one is in progress will result in blocking until
+// the current read/write transaction is completed.
+//
+// All transactions must be closed by calling Commit() or Rollback() when done.
+func (db *FlashDB) Begin(writable bool) (*Tx, error) {
+	tx := &Tx{
+		db:       db,
+		writable: writable,
+	}
+	tx.lock()
+	if db.closed {
+		tx.unlock()
+		return nil, ErrDatabaseClosed
+	}
+	if writable {
+		tx.wc = &txWriteContext{}
+		if db.persist {
+			tx.wc.commitItems = make([]*record, 0, 1)
+		}
+	}
+	return tx, nil
+}
+
+// Commit writes all changes to disk.
+// An error is returned when a write error occurs, or when a Commit() is called
+// from a read-only transaction.
+func (tx *Tx) Commit() error {
+	if tx.db == nil {
+		return ErrTxClosed
+	} else if !tx.writable {
+		return ErrTxNotWritable
+	}
+	var err error
+	if tx.db.persist && (len(tx.wc.commitItems) > 0) {
+		batch := new(aol.Batch)
+		// Each committed record is written to disk
+		for _, r := range tx.wc.commitItems {
+			rec, err := r.encode()
+			if err != nil {
+				return err
+			}
+			batch.Write(rec)
+		}
+		// If this operation fails then the write did failed and we must
+		// rollback.
+		err = tx.db.log.WriteBatch(batch)
+		if err != nil {
+			tx.rollbackInner()
+		}
+	}
+
+	// apply all commands
+	err = tx.buildRecords(tx.wc.commitItems)
+	// Unlock the database and allow for another writable transaction.
+	tx.unlock()
+	// Clear the db field to disable this transaction from future use.
+	tx.db = nil
+	return err
+}
+
 // View executes a function within a managed read-only transaction.
 // When a non-nil error is returned from the function that error will be return
 // to the caller of View().
@@ -110,87 +171,21 @@ func (tx *Tx) Rollback() error {
 // rollbackInner handles the underlying rollback logic.
 // Intended to be called from Commit() and Rollback().
 func (tx *Tx) rollbackInner() {
-	for _, item := range tx.wc.rollbackItems {
-		tx.db.rollbackFromDatabase(item)
-	}
+	tx.wc.commitItems = nil
 }
 
-// Commit writes all changes to disk.
-// An error is returned when a write error occurs, or when a Commit() is called
-// from a read-only transaction.
-func (tx *Tx) Commit() error {
-	if tx.db == nil {
-		return ErrTxClosed
-	} else if !tx.writable {
-		return ErrTxNotWritable
-	}
-	var err error
-	if tx.db.persist && (len(tx.wc.commitItems) > 0) {
-		batch := new(aol.Batch)
-		// Each committed record is written to disk
-		for _, r := range tx.wc.commitItems {
-			rec, err := r.encode()
-			if err != nil {
-				return err
-			}
-			batch.Write(rec)
-		}
-		// If this operation fails then the write did failed and we must
-		// rollback.
-		err = tx.db.log.WriteBatch(batch)
-		if err != nil {
-			tx.rollbackInner()
+func (tx *Tx) buildRecords(recs []*record) (err error) {
+	for _, r := range recs {
+		switch r.getType() {
+		case StringRecord:
+			err = tx.db.buildStringRecord(r)
+		case HashRecord:
+			err = tx.db.buildHashRecord(r)
+		case SetRecord:
+			err = tx.db.buildSetRecord(r)
+		case ZSetRecord:
+			err = tx.db.buildZsetRecord(r)
 		}
 	}
-	// Unlock the database and allow for another writable transaction.
-	tx.unlock()
-	// Clear the db field to disable this transaction from future use.
-	tx.db = nil
-	return err
-}
-
-// Begin opens a new transaction.
-// Multiple read-only transactions can be opened at the same time but there can
-// only be one read/write transaction at a time. Attempting to open a read/write
-// transactions while another one is in progress will result in blocking until
-// the current read/write transaction is completed.
-//
-// All transactions must be closed by calling Commit() or Rollback() when done.
-func (db *FlashDB) Begin(writable bool) (*Tx, error) {
-	tx := &Tx{
-		db:       db,
-		writable: writable,
-	}
-	tx.lock()
-	if db.closed {
-		tx.unlock()
-		return nil, ErrDatabaseClosed
-	}
-	if writable {
-		tx.wc = &txWriteContext{}
-		tx.wc.rollbackItems = make([]*record, 0)
-		if db.persist {
-			tx.wc.commitItems = make([]*record, 0)
-		}
-	}
-	return tx, nil
-}
-
-// rollbackFromDatabase removes and item from the database and expiry list.
-func (db *FlashDB) rollbackFromDatabase(r *record) {
-	key := string(r.meta.key)
-	switch r.getType() {
-	case StringRecord:
-		db.strStore.Delete(key)
-		db.exps.HDel(String, key)
-	case HashRecord:
-		db.hashStore.HClear(key)
-		db.exps.HDel(Hash, key)
-	case SetRecord:
-		db.setStore.SClear(key)
-		db.exps.HDel(Set, key)
-	case ZSetRecord:
-		db.zsetStore.ZClear(key)
-		db.exps.HDel(ZSet, key)
-	}
+	return
 }

@@ -1,19 +1,12 @@
 package flashdb
 
 import (
-	"reflect"
 	"time"
 )
 
 func (tx *Tx) Set(key string, value string) error {
-
 	e := newRecord([]byte(key), []byte(value), StringRecord, StringSet)
 	tx.addRecord(e)
-
-	err := tx.set(key, value)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -24,15 +17,9 @@ func (tx *Tx) SetEx(key string, value string, duration int64) (err error) {
 	}
 
 	ttl := time.Now().Unix() + duration
-	e := newRecordWithExpire([]byte(key), []byte(value), ttl, StringRecord, StringExpire)
+	e := newRecordWithExpire([]byte(key), nil, ttl, StringRecord, StringExpire)
 	tx.addRecord(e)
 
-	if err = tx.set(key, value); err != nil {
-		return
-	}
-
-	// set expired info.
-	tx.db.setTTL(String, key, ttl)
 	return
 }
 
@@ -46,12 +33,9 @@ func (tx *Tx) Get(key string) (val string, err error) {
 }
 
 func (tx *Tx) Delete(key string) error {
-
 	e := newRecord([]byte(key), nil, StringRecord, StringRem)
 	tx.addRecord(e)
 
-	tx.db.strStore.Delete(key)
-	tx.db.exps.HDel(String, key)
 	return nil
 }
 
@@ -68,12 +52,10 @@ func (tx *Tx) Expire(key string, duration int64) (err error) {
 	e := newRecordWithExpire([]byte(key), nil, ttl, StringRecord, StringExpire)
 	tx.addRecord(e)
 
-	tx.db.setTTL(String, key, ttl)
 	return
 }
 
 func (tx *Tx) TTL(key string) (ttl int64) {
-
 	deadline := tx.db.getTTL(String, key)
 	if deadline == nil {
 		return
@@ -97,22 +79,6 @@ func (tx *Tx) Exists(key string) bool {
 	}
 
 	return true
-}
-
-func (tx *Tx) set(key string, value string) error {
-	var existVal string
-	existVal, err := tx.get(key)
-	if err != nil && err != ErrExpiredKey && err != ErrInvalidKey {
-		return err
-	}
-
-	if reflect.DeepEqual(existVal, value) {
-		return err
-	}
-
-	tx.db.strStore.Set(key, value)
-
-	return nil
 }
 
 func (tx *Tx) get(key string) (val string, err error) {

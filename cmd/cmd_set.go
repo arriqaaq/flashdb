@@ -19,29 +19,7 @@ func sAdd(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 	}
 
 	err = db.View(func(tx *flashdb.Tx) error {
-		var count int
-		if count, err = tx.SAdd(args[0], members...); err == nil {
-			res = redcon.SimpleInt(count)
-		}
-		return err
-	})
-
-	return
-}
-
-func sPop(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
-	if len(args) != 2 {
-		err = newWrongNumOfArgsError("spop")
-		return
-	}
-	count, err := strconv.Atoi(args[1])
-	if err != nil {
-		err = ErrSyntaxIncorrect
-		return
-	}
-
-	err = db.View(func(tx *flashdb.Tx) error {
-		res, err = tx.SPop(args[0], count)
+		err = tx.SAdd(args[0], members...)
 		return err
 	})
 
@@ -200,7 +178,6 @@ func sclear(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 
 func init() {
 	addExecCommand("sadd", sAdd)
-	addExecCommand("spop", sPop)
 	addExecCommand("sismember", sIsMember)
 	addExecCommand("srandmember", sRandMember)
 	addExecCommand("srem", sRem)

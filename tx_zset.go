@@ -13,7 +13,6 @@ func (tx *Tx) ZAdd(key string, score float64, member string) error {
 	e := newRecordWithValue([]byte(key), []byte(member), []byte(value), ZSetRecord, ZSetZAdd)
 	tx.addRecord(e)
 
-	tx.db.zsetStore.ZAdd(key, score, member, nil)
 	return nil
 }
 
@@ -51,16 +50,6 @@ func (tx *Tx) ZRevRank(key string, member string) int64 {
 	}
 
 	return tx.db.zsetStore.ZRevRank(key, member)
-}
-
-func (tx *Tx) ZIncrBy(key string, increment float64, member string) (float64, error) {
-	value := float64ToStr(increment)
-	e := newRecordWithValue([]byte(key), []byte(member), []byte(value), ZSetRecord, ZSetZAdd)
-	tx.addRecord(e)
-
-	increment = tx.db.zsetStore.ZIncrBy(key, increment, member)
-
-	return increment, nil
 }
 
 func (tx *Tx) ZRange(key string, start, stop int) []interface{} {
@@ -164,8 +153,6 @@ func (tx *Tx) ZClear(key string) (err error) {
 	e := newRecord([]byte(key), nil, ZSetRecord, ZSetZClear)
 	tx.addRecord(e)
 
-	tx.db.zsetStore.ZClear(key)
-	tx.db.exps.HDel(ZSet, key)
 	return
 }
 
@@ -180,8 +167,6 @@ func (tx *Tx) ZExpire(key string, duration int64) (err error) {
 	ttl := time.Now().Unix() + duration
 	e := newRecordWithExpire([]byte(key), nil, ttl, ZSetRecord, ZSetZExpire)
 	tx.addRecord(e)
-
-	tx.db.setTTL(ZSet, key, ttl)
 	return
 }
 
