@@ -6,7 +6,7 @@ import (
 	"github.com/arriqaaq/aol"
 )
 
-// load String, List, Hash, Set and ZSet stores from append-only log
+// load String, Hash, Set and ZSet stores from append-only log
 func (db *FlashDB) load() error {
 	if db.log == nil {
 		return nil

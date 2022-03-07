@@ -155,6 +155,9 @@ Commands
 TODO
 ====
 
+FlashDB is a toy db and in early stages of development. A couple of to-do tasks listed:
+
+- Add transaction to eviction to avoid locks
 - Add more comprehensive unit test cases
 - Add more bench tests
 - Add explicit logging messages

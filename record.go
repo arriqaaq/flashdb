@@ -18,7 +18,7 @@ var (
 const (
 	// keySize, memberSize, valueSize is uint32 type，4 bytes each.
 	// timestamp 8 bytes, state 2 bytes.
-	// 4 + 4 + 4 + 8 + 2 = 30
+	// 4 + 4 + 4 + 8 + 2 = 22
 	entryHeaderSize = 22
 )
 
