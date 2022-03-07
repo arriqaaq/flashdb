@@ -1,61 +1,69 @@
 package flashdb
 
-// import (
-// 	"fmt"
-// 	"os"
-// 	"testing"
+import (
+	"fmt"
+	"os"
+	"testing"
 
-// 	"github.com/arriqaaq/aol"
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/arriqaaq/aol"
+	"github.com/stretchr/testify/assert"
+)
 
-// func makeLoadRecords(n int, db *FlashDB) {
-// 	for i := 1; i <= n; i++ {
-// 		key := fmt.Sprintf("key_%d", i)
-// 		member := fmt.Sprintf("member_%d", i)
-// 		value := fmt.Sprintf("value_%d", i)
-// 		db.HSet(key, member, value)
-// 		db.SAdd(key, member)
-// 		db.Set(key, member)
-// 		db.ZAdd(key, 10.0, member)
-// 	}
-// }
+func makeLoadRecords(n int, db *FlashDB) {
+	for i := 1; i <= n; i++ {
+		key := fmt.Sprintf("key_%d", i)
+		member := fmt.Sprintf("member_%d", i)
+		value := fmt.Sprintf("value_%d", i)
+		db.Update(func(tx *Tx) error {
+			tx.HSet(key, member, value)
+			tx.SAdd(key, member)
+			tx.Set(key, member)
+			tx.ZAdd(key, 10.0, member)
+			return nil
+		})
 
-// func TestFlashDB_load(t *testing.T) {
-// 	db := getTestDB()
-// 	logPath := "tmp/"
-// 	l, err := aol.Open(logPath, nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	db.log = l
-// 	defer os.RemoveAll("tmp/")
+	}
+}
 
-// 	makeLoadRecords(10, db)
+func TestFlashDB_load(t *testing.T) {
+	db := getTestDB()
+	logPath := "tmp/"
+	l, err := aol.Open(logPath, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db.log = l
+	db.persist = true
+	defer os.RemoveAll("tmp/")
 
-// 	db.Close()
+	makeLoadRecords(10, db)
 
-// 	p, err := aol.Open(logPath, nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	db2 := getTestDB()
-// 	db2.log = p
-// 	err = db2.load()
-// 	assert.NoError(t, err)
+	db.Close()
 
-// 	for i := 1; i <= 10; i++ {
-// 		key := fmt.Sprintf("key_%d", i)
-// 		member := fmt.Sprintf("member_%d", i)
-// 		value := fmt.Sprintf("value_%d", i)
+	p, err := aol.Open(logPath, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	db2 := getTestDB()
+	db2.log = p
+	err = db2.load()
+	assert.NoError(t, err)
 
-// 		assert.Equal(t, value, db.HGet(key, member))
-// 		assert.True(t, db.SIsMember(key, member))
-// 		val, err := db.Get(key)
-// 		assert.NoError(t, err)
-// 		assert.Equal(t, member, val)
-// 		ok, score := db.ZScore(key, member)
-// 		assert.True(t, ok)
-// 		assert.Equal(t, 10.0, score)
-// 	}
-// }
+	for i := 1; i <= 10; i++ {
+		key := fmt.Sprintf("key_%d", i)
+		member := fmt.Sprintf("member_%d", i)
+		value := fmt.Sprintf("value_%d", i)
+		db2.View(func(tx *Tx) error {
+			assert.Equal(t, value, tx.HGet(key, member))
+			assert.True(t, tx.SIsMember(key, member))
+			val, err := tx.Get(key)
+			assert.NoError(t, err)
+			assert.Equal(t, member, val)
+			ok, score := tx.ZScore(key, member)
+			assert.True(t, ok)
+			assert.Equal(t, 10.0, score)
+			return nil
+		})
+
+	}
+}
