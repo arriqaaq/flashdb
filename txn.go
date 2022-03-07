@@ -75,9 +75,6 @@ func (db *FlashDB) managed(writable bool, fn func(tx *Tx) error) (err error) {
 // View executes a function within a managed read-only transaction.
 // When a non-nil error is returned from the function that error will be return
 // to the caller of View().
-//
-// Executing a manual commit or rollback from inside the function will result
-// in a panic.
 func (db *FlashDB) View(fn func(tx *Tx) error) error {
 	return db.managed(false, fn)
 }
@@ -87,9 +84,6 @@ func (db *FlashDB) View(fn func(tx *Tx) error) error {
 // In the event that an error is returned, the transaction will be rolled back.
 // When a non-nil error is returned from the function, the transaction will be
 // rolled back and the that error will be return to the caller of Update().
-//
-// Executing a manual commit or rollback from inside the function will result
-// in a panic.
 func (db *FlashDB) Update(fn func(tx *Tx) error) error {
 	return db.managed(true, fn)
 }
@@ -141,7 +135,6 @@ func (tx *Tx) Commit() error {
 			}
 			batch.Write(rec)
 		}
-		// Flushing the buffer only once per transaction.
 		// If this operation fails then the write did failed and we must
 		// rollback.
 		err = tx.db.log.WriteBatch(batch)
@@ -174,8 +167,6 @@ func (db *FlashDB) Begin(writable bool) (*Tx, error) {
 		return nil, ErrDatabaseClosed
 	}
 	if writable {
-		// writable transactions have a writeContext object that
-		// contains information about changes to the database.
 		tx.wc = &txWriteContext{}
 		tx.wc.rollbackItems = make([]*record, 0)
 		if db.persist {
@@ -185,12 +176,7 @@ func (db *FlashDB) Begin(writable bool) (*Tx, error) {
 	return tx, nil
 }
 
-// rollbackFromDatabase removes and item from the database and indexes. The input
-// item must only have the key field specified thus "&dbItem{key: key}" is all
-// that is needed to fully remove the item with the matching key. If an item
-// with the matching key was found in the database, it will be removed and
-// returned to the caller. A nil return value means that the item was not
-// found in the database
+// rollbackFromDatabase removes and item from the database and expiry list.
 func (db *FlashDB) rollbackFromDatabase(r *record) {
 	key := string(r.meta.key)
 	switch r.getType() {

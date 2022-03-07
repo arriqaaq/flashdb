@@ -29,8 +29,8 @@ func (c *Config) evictionInterval() time.Duration {
 
 func DefaultConfig() *Config {
 	return &Config{
-		Addr: DefaultAddr,
-		// Path:             "/tmp/flashdb",
+		Addr:             DefaultAddr,
+		Path:             "/tmp/flashdb",
 		EvictionInterval: 1,
 	}
 }

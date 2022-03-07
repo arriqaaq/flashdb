@@ -8,8 +8,14 @@ import (
 
 var testKey = "dummy"
 
+func testConfig() *Config {
+	return &Config{
+		Addr: DefaultAddr,
+	}
+}
+
 func getTestDB() *FlashDB {
-	db, _ := New(DefaultConfig())
+	db, _ := New(testConfig())
 	return db
 }
 
