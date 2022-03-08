@@ -111,3 +111,40 @@ func TestFlashDB_HExists(t *testing.T) {
 		return nil
 	})
 }
+
+func TestFlashDB_HKeyExists(t *testing.T) {
+	db := getTestDB()
+	defer db.Close()
+	defer os.RemoveAll(tmpDir)
+
+	if err := db.Update(func(tx *Tx) error {
+		tx.HSet(testKey, "bar", "1")
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	db.View(func(tx *Tx) error {
+		assert.True(t, tx.HKeyExists(testKey))
+		assert.False(t, tx.HKeyExists("yolo"))
+		return nil
+	})
+}
+
+func TestFlashDB_HLen(t *testing.T) {
+	db := getTestDB()
+	defer db.Close()
+	defer os.RemoveAll(tmpDir)
+
+	if err := db.Update(func(tx *Tx) error {
+		tx.HSet(testKey, "bar", "1")
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	db.View(func(tx *Tx) error {
+		assert.Equal(t, tx.HLen(testKey), 1)
+		return nil
+	})
+}
