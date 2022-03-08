@@ -87,6 +87,7 @@ func expire(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 func ttl(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 	if len(args) != 1 {
 		err = newWrongNumOfArgsError("ttl")
+		return
 	}
 
 	err = db.View(func(tx *flashdb.Tx) error {
