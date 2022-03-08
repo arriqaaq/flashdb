@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/arriqaaq/flashdb"
@@ -49,7 +50,7 @@ func main() {
 }
 
 func newConfigFromFile(config string) (*flashdb.Config, error) {
-	data, err := ioutil.ReadFile(config)
+	data, err := ioutil.ReadFile(filepath.Clean(config))
 	if err != nil {
 		return nil, err
 	}
