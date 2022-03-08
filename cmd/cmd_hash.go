@@ -57,9 +57,7 @@ func hDel(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 	}
 
 	var fields []string
-	for _, f := range args[1:] {
-		fields = append(fields, f)
-	}
+	fields = append(fields, args[1:]...)
 
 	err = db.Update(func(tx *flashdb.Tx) error {
 		var count int

@@ -14,9 +14,7 @@ func sAdd(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 	}
 
 	var members []string
-	for _, m := range args[1:] {
-		members = append(members, m)
-	}
+	members = append(members, args[1:]...)
 
 	err = db.View(func(tx *flashdb.Tx) error {
 		err = tx.SAdd(args[0], members...)
@@ -69,9 +67,7 @@ func sRem(db *flashdb.FlashDB, args []string) (res interface{}, err error) {
 		return
 	}
 	var members []string
-	for _, m := range args[1:] {
-		members = append(members, m)
-	}
+	members = append(members, args[1:]...)
 
 	err = db.View(func(tx *flashdb.Tx) error {
 		var count int
