@@ -122,7 +122,7 @@ func main() {
 			printCmdHelp()
 		} else if lowerCmd == "quit" {
 			break
-		} else if strings.ToLower(c[0]) == "help" && len(c) == 2 {
+		} else if strings.EqualFold(c[0], "help") && len(c) == 2 {
 			helpCmd := strings.ToLower(c[1])
 			if !commandSet[helpCmd] {
 				fmt.Println("command not found")
@@ -130,7 +130,7 @@ func main() {
 			}
 
 			for _, command := range commandList {
-				if strings.ToLower(command[0]) == helpCmd {
+				if strings.EqualFold(command[0], helpCmd) {
 					fmt.Println()
 					fmt.Println(" --usage: " + helpCmd + " " + command[1])
 					fmt.Println(" --group: " + command[2] + "\n")

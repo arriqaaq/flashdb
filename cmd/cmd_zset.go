@@ -122,7 +122,7 @@ func zRevRange(db *flashdb.FlashDB, args []string) (res interface{}, err error) 
 func zRawRange(db *flashdb.FlashDB, args []string, rev bool) (res interface{}, err error) {
 	withScores := false
 	if len(args) == 4 {
-		if strings.ToLower(args[3]) == "withscores" {
+		if strings.EqualFold(args[3], "withscores") {
 			withScores = true
 			args = args[:3]
 		} else {
