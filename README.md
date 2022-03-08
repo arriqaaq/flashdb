@@ -15,7 +15,7 @@ Features
 
 - In-memory database for [fast reads and writes](#performance)
 - Embeddable with a simple API
-- Supports Redis like operatios for SET, SORTED SET, HASH and STRING
+- Supports Redis like operations for SET, SORTED SET, HASH and STRING
 - [Durable append-only file](#append-only-file) format for persistence
 - Option to evict old items with an [expiration](#data-expiration) TTL
 - ACID semantics with locking [transactions](#transactions) that support rollbacks
