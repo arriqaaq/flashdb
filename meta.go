@@ -1,6 +1,5 @@
 package flashdb
 
-// DataType Define the data structure type.
 type DataType = string
 
 const (
@@ -17,14 +16,14 @@ const (
 	ZSetRecord
 )
 
-// The operations of a String Type, will be a part of Entry, the same for the other four types.
+// The operations on Strings.
 const (
 	StringSet uint16 = iota
 	StringRem
 	StringExpire
 )
 
-// The operations of Hash.
+// The operations on Hash.
 const (
 	HashHSet uint16 = iota
 	HashHDel
@@ -32,7 +31,7 @@ const (
 	HashHExpire
 )
 
-// The operations of Set.
+// The operations on Set.
 const (
 	SetSAdd uint16 = iota
 	SetSRem
@@ -41,7 +40,7 @@ const (
 	SetSExpire
 )
 
-// The operations of Sorted Set.
+// The operations on Sorted Set.
 const (
 	ZSetZAdd uint16 = iota
 	ZSetZRem

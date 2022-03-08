@@ -120,7 +120,7 @@ func (tx *Tx) Commit() error {
 		// rollback.
 		err = tx.db.log.WriteBatch(batch)
 		if err != nil {
-			tx.rollbackInner()
+			tx.rollback()
 		}
 	}
 
@@ -159,7 +159,7 @@ func (tx *Tx) Rollback() error {
 	}
 	// The rollback func does the heavy lifting.
 	if tx.writable {
-		tx.rollbackInner()
+		tx.rollback()
 	}
 	// unlock the database for more transactions.
 	tx.unlock()
@@ -168,9 +168,9 @@ func (tx *Tx) Rollback() error {
 	return nil
 }
 
-// rollbackInner handles the underlying rollback logic.
+// rollback handles the underlying rollback logic.
 // Intended to be called from Commit() and Rollback().
-func (tx *Tx) rollbackInner() {
+func (tx *Tx) rollback() {
 	tx.wc.commitItems = nil
 }
 

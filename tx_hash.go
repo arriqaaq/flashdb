@@ -17,9 +17,6 @@ func (tx *Tx) HSet(key string, field string, value string) (res int, err error) 
 }
 
 func (tx *Tx) HGet(key string, field string) string {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return ""
@@ -29,9 +26,6 @@ func (tx *Tx) HGet(key string, field string) string {
 }
 
 func (tx *Tx) HGetAll(key string) []string {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return nil
@@ -48,7 +42,6 @@ func (tx *Tx) HGetAll(key string) []string {
 }
 
 func (tx *Tx) HDel(key string, field ...string) (res int, err error) {
-
 	for _, f := range field {
 		e := newRecord([]byte(key), []byte(f), HashRecord, HashHDel)
 		tx.addRecord(e)
@@ -58,9 +51,6 @@ func (tx *Tx) HDel(key string, field ...string) (res int, err error) {
 }
 
 func (tx *Tx) HKeyExists(key string) (ok bool) {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return
@@ -69,9 +59,6 @@ func (tx *Tx) HKeyExists(key string) (ok bool) {
 }
 
 func (tx *Tx) HExists(key, field string) (ok bool) {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return
@@ -81,9 +68,6 @@ func (tx *Tx) HExists(key, field string) (ok bool) {
 }
 
 func (tx *Tx) HLen(key string) int {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return 0
@@ -93,9 +77,6 @@ func (tx *Tx) HLen(key string) int {
 }
 
 func (tx *Tx) HKeys(key string) (val []string) {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return nil
@@ -105,9 +86,6 @@ func (tx *Tx) HKeys(key string) (val []string) {
 }
 
 func (tx *Tx) HVals(key string) (values []string) {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return nil
@@ -138,9 +116,6 @@ func (tx *Tx) HExpire(key string, duration int64) (err error) {
 }
 
 func (tx *Tx) HTTL(key string) (ttl int64) {
-	tx.db.hashStore.RLock()
-	defer tx.db.hashStore.RUnlock()
-
 	if tx.db.hasExpired(key, Hash) {
 		tx.db.evict(key, Hash)
 		return
