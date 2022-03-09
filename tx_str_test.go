@@ -35,7 +35,7 @@ func TestFlashDB_SetEx(t *testing.T) {
 	defer db.Close()
 	defer os.RemoveAll(tmpDir)
 
-	if err := db.View(func(tx *Tx) error {
+	if err := db.Update(func(tx *Tx) error {
 		err := tx.SetEx("foo", "1", -4)
 		assert.NotEmpty(t, err)
 
@@ -52,13 +52,19 @@ func TestFlashDB_Delete(t *testing.T) {
 	defer db.Close()
 	defer os.RemoveAll(tmpDir)
 
-	if err := db.View(func(tx *Tx) error {
+	if err := db.Update(func(tx *Tx) error {
 		err := tx.Set("foo", "bar")
 		assert.Equal(t, err, nil)
 
 		err = tx.Delete("foo")
 		assert.Equal(t, err, nil)
 
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := db.View(func(tx *Tx) error {
 		val, err := tx.Get("foo")
 		assert.Empty(t, val)
 		assert.Equal(t, ErrInvalidKey, err)
@@ -66,6 +72,7 @@ func TestFlashDB_Delete(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+
 }
 
 func TestFlashDB_TTL(t *testing.T) {

@@ -17,9 +17,7 @@ type Tx struct {
 }
 
 func (tx *Tx) addRecord(r *record) {
-	if tx.db.persist && tx.writable {
-		tx.wc.commitItems = append(tx.wc.commitItems, r)
-	}
+	tx.wc.commitItems = append(tx.wc.commitItems, r)
 }
 
 type txWriteContext struct {
@@ -106,7 +104,7 @@ func (tx *Tx) Commit() error {
 		return ErrTxNotWritable
 	}
 	var err error
-	if tx.db.persist && (len(tx.wc.commitItems) > 0) {
+	if tx.db.persist && (len(tx.wc.commitItems) > 0) && tx.writable {
 		batch := new(aol.Batch)
 		// Each committed record is written to disk
 		for _, r := range tx.wc.commitItems {
