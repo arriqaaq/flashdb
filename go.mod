@@ -3,7 +3,7 @@ module github.com/arriqaaq/flashdb
 go 1.17
 
 require (
-	github.com/arriqaaq/aol v0.1.0
+	github.com/arriqaaq/aol v0.1.2
 	github.com/arriqaaq/hash v0.1.2
 	github.com/arriqaaq/set v0.1.2
 	github.com/arriqaaq/skiplist v0.1.1

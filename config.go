@@ -15,6 +15,9 @@ type Config struct {
 	Addr             string `json:"addr" toml:"addr"`
 	Path             string `json:"path" toml:"path"`                           // dir path for append-only logs
 	EvictionInterval int    `json:"eviction_interval" toml:"eviction_interval"` // in seconds
+	// NoSync disables fsync after writes. This is less durable and puts the
+	// log at risk of data loss when there's a server crash.
+	NoSync bool
 }
 
 func (c *Config) validate() {

@@ -65,7 +65,10 @@ func New(config *Config) (*FlashDB, error) {
 
 	db.persist = config.Path != ""
 	if db.persist {
-		l, err := aol.Open(config.Path, nil)
+		opts := aol.DefaultOptions
+		opts.NoSync = config.NoSync
+
+		l, err := aol.Open(config.Path, opts)
 		if err != nil {
 			return nil, err
 		}
