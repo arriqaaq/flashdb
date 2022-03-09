@@ -14,8 +14,9 @@ var (
 
 func testConfig() *Config {
 	return &Config{
-		Addr: DefaultAddr,
-		Path: tmpDir,
+		Addr:   DefaultAddr,
+		Path:   tmpDir,
+		NoSync: true,
 	}
 }
 
