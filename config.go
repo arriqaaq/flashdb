@@ -34,7 +34,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		Addr:             DefaultAddr,
 		Path:             "/tmp/flashdb",
-		EvictionInterval: 1,
+		EvictionInterval: 10,
 	}
 }
 
