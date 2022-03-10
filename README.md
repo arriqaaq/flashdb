@@ -151,6 +151,26 @@ Commands
 |        |         |             | ZCLEAR         |
 
 
+Setup
+=====
+
+<p align="center">
+<img
+    src="img/cli.png" alt="FlashDB">
+</p>
+
+
+Run the server
+```go
+go build -o bin/flashdb-server cmd/server/main.go
+```
+
+Run the client
+```go
+go build -o bin/flashdb-cli cmd/cli/main.go
+```
+
+
 
 Benchmarks
 ==========
