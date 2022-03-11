@@ -12,7 +12,6 @@ import (
 
 var (
 	ErrInvalidEntry = errors.New("invalid entry")
-	ErrInvalidCrc   = errors.New("invalid crc")
 )
 
 const (
