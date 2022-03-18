@@ -8,6 +8,8 @@ github.com/arriqaaq/skiplist v0.1.1 h1:1iDB3wZEP1rEpBOnDXU8c0l6Ueu6vkwlE6WdeMG3B
 github.com/arriqaaq/skiplist v0.1.1/go.mod h1:iFkbyk/oh3K2w9sPqtijfDrMeTcoGu6uI+9DSGL/Zxw=
 github.com/arriqaaq/skiplist v0.1.2 h1:C1uX72IUSmbRcdXSMhMsOW7v5QworuIJr1VJ1tJJKVo=
 github.com/arriqaaq/skiplist v0.1.2/go.mod h1:iFkbyk/oh3K2w9sPqtijfDrMeTcoGu6uI+9DSGL/Zxw=
+github.com/arriqaaq/skiplist v0.1.5 h1:gEktKQC12Sl3xEs8nlDZBksg/WS/R4HupHuhSa/qh4E=
+github.com/arriqaaq/skiplist v0.1.5/go.mod h1:iFkbyk/oh3K2w9sPqtijfDrMeTcoGu6uI+9DSGL/Zxw=
 github.com/arriqaaq/zset v0.1.2 h1:vF/B95Unz/zA0Ttmc1XHCQVyxIXd7B6PNc3H4aCOdyo=
 github.com/arriqaaq/zset v0.1.2/go.mod h1:5DoabYGc0lHZnhhzZoYawG015X7i+bphIsa6qEekFuI=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
