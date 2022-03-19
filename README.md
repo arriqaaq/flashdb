@@ -198,7 +198,7 @@ BenchmarkFlashDBPutValue64B-16      	  159992	      7208 ns/op	    1461 B/op	   
 BenchmarkFlashDBPutValue128B-16     	  175634	      9499 ns/op	    2003 B/op	      19 allocs/op
 BenchmarkFlashDBPutValue256B-16     	  148362	      9278 ns/op	    3322 B/op	      19 allocs/op
 BenchmarkFlashDBPutValue512B-16     	  120865	     16542 ns/op	    6037 B/op	      19 allocs/op
-BenchmarkFlashDBGet-16              	 1881042	       643.9 ns/op	      32 B/op	       2 allocs/op
+BenchmarkFlashDBGet-16              	 1881042	     643.9 ns/op	      32 B/op	       2 allocs/op
 
 PASS
 ok  	github.com/arriqaaq/flashbench	28.947s
