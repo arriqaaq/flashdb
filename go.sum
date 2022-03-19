@@ -1,5 +1,9 @@
 github.com/arriqaaq/aol v0.1.2 h1:uGEMA1mYu968vmRUSE9d2++YUaDGObbBN1QzD6RlgC4=
 github.com/arriqaaq/aol v0.1.2/go.mod h1:GQ7Jdsp3RYIbUsovCh0XdIbRj0mvBNBFQeIfL1oKKKE=
+github.com/arriqaaq/art v0.0.0-20220319111936-5fc2b09069cf h1:9S7HULr6MZf9EK2u/mxT8KGW6hF222gKbaYzuRJ99Mg=
+github.com/arriqaaq/art v0.0.0-20220319111936-5fc2b09069cf/go.mod h1:11r05D8a+owc6lTpI/yVypn16g7LrsVif+8lU9riSDM=
+github.com/arriqaaq/art v0.1.1 h1:RPrzuaAkIkBAHvfqubVCFu5+IDyn0Lk8BIkAHWRJ+Ns=
+github.com/arriqaaq/art v0.1.1/go.mod h1:11r05D8a+owc6lTpI/yVypn16g7LrsVif+8lU9riSDM=
 github.com/arriqaaq/hash v0.1.2 h1:q/Az5T00nkqEc/XhlnrGcPeZBmgBM5ktKi26nr70s9c=
 github.com/arriqaaq/hash v0.1.2/go.mod h1:WB3wOwaJdkNPb8DX+J2YHivF9y+sJkXhM1B4gH7xphE=
 github.com/arriqaaq/set v0.1.2 h1:uiIarvVXvsAWr/RQ4L9C7HgOXh4jteaBeFMwU/faWlk=
@@ -23,6 +27,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
+github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tidwall/btree v1.1.0 h1:5P+9WU8ui5uhmcg3SoPyTwoI0mVyZ1nps7YQzTZFkYM=
 github.com/tidwall/btree v1.1.0/go.mod h1:TzIRzen6yHbibdSfK6t8QimqbUnoxUSrZfeW7Uob0q4=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=

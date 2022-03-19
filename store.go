@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/arriqaaq/art"
 	"github.com/arriqaaq/hash"
 	"github.com/arriqaaq/set"
-	"github.com/arriqaaq/skiplist"
 	"github.com/arriqaaq/zset"
 )
 
@@ -23,22 +23,30 @@ type store interface {
 
 type strStore struct {
 	sync.RWMutex
-	*skiplist.Skiplist
+	*art.Tree
 }
 
 func newStrStore() *strStore {
 	n := &strStore{}
-	n.Skiplist = skiplist.New()
+	n.Tree = art.NewTree()
 	return n
 }
 
 func (s *strStore) get(key string) (val interface{}, err error) {
-	node := s.Get(key)
-	if node == nil {
+	val = s.Search([]byte(key))
+	if val == nil {
 		return nil, ErrInvalidKey
 	}
+	return
+}
 
-	val = node.Value()
+func (s *strStore) Keys() (keys []string) {
+	s.Each(func(node *art.Node) {
+		if node.IsLeaf() {
+			key := string(node.Key())
+			keys = append(keys, key)
+		}
+	})
 	return
 }
 
@@ -60,7 +68,7 @@ func (s *strStore) evict(cache *hash.Hash) {
 	}
 
 	for _, k := range expiredKeys {
-		s.Delete(k)
+		s.Delete([]byte(k))
 		cache.HDel(String, k)
 	}
 }
