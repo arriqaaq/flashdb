@@ -115,7 +115,7 @@ func (db *FlashDB) evict(key string, dType DataType) {
 		switch dType {
 		case String:
 			r = newRecord([]byte(key), nil, StringRecord, StringRem)
-			db.strStore.Delete(key)
+			db.strStore.Delete([]byte(key))
 		case Hash:
 			r = newRecord([]byte(key), nil, HashRecord, HashHClear)
 			db.hashStore.HClear(key)

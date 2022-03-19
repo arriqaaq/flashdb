@@ -4,14 +4,14 @@ go 1.17
 
 require (
 	github.com/arriqaaq/aol v0.1.2
+	github.com/arriqaaq/art v0.1.1
 	github.com/arriqaaq/hash v0.1.2
 	github.com/arriqaaq/set v0.1.2
-	github.com/arriqaaq/skiplist v0.1.6
 	github.com/arriqaaq/zset v0.1.2
 	github.com/gomodule/redigo v1.8.8
 	github.com/pelletier/go-toml v1.9.4
 	github.com/peterh/liner v1.2.2
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/redcon v1.4.4
 )
 

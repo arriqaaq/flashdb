@@ -30,7 +30,7 @@ learning for anyone new on how to build a simple ACID database.
 
 - [Set](https://github.com/arriqaaq/set)
 - [ZSet](https://github.com/arriqaaq/zset)
-- [String](https://github.com/arriqaaq/skiplist)
+- [String](https://github.com/arriqaaq/art)
 - [Hash](https://github.com/arriqaaq/hash)
 - [Append Only Log](https://github.com/arriqaaq/aol)
 
