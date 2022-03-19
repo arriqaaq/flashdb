@@ -194,11 +194,11 @@ BenchmarkBadgerDBPutValue256B-16    	    7368	    142600 ns/op	    2637 B/op	   
 BenchmarkBadgerDBPutValue512B-16    	    6980	    148056 ns/op	    3149 B/op	      69 allocs/op
 BenchmarkBadgerDBGet-16             	 1000000	      1388 ns/op	     408 B/op	       9 allocs/op
 
-BenchmarkFlashDBPutValue64B-16      	  159992	      7208 ns/op	    1461 B/op	      19 allocs/op
-BenchmarkFlashDBPutValue128B-16     	  175634	      9499 ns/op	    2003 B/op	      19 allocs/op
-BenchmarkFlashDBPutValue256B-16     	  148362	      9278 ns/op	    3322 B/op	      19 allocs/op
-BenchmarkFlashDBPutValue512B-16     	  120865	     16542 ns/op	    6037 B/op	      19 allocs/op
-BenchmarkFlashDBGet-16              	 1881042	     643.9 ns/op	      32 B/op	       2 allocs/op
+BenchmarkFlashDBPutValue64B-16     	  204318	      5129 ns/op	    1385 B/op	      19 allocs/op
+BenchmarkFlashDBPutValue128B-16    	  231177	      5318 ns/op	    1976 B/op	      16 allocs/op
+BenchmarkFlashDBPutValue256B-16    	  189516	      6202 ns/op	    3263 B/op	      15 allocs/op
+BenchmarkFlashDBPutValue512B-16    	  165580	      8110 ns/op	    5866 B/op	      16 allocs/op
+BenchmarkFlashDBGet-16             	 4053836	       295 ns/op	      32 B/op	       2 allocs/op
 
 PASS
 ok  	github.com/arriqaaq/flashbench	28.947s
@@ -218,10 +218,11 @@ BenchmarkNutsDBPutValue128B-16    	      63	  23496536 ns/op	    1059 B/op	     
 BenchmarkNutsDBPutValue256B-16    	      62	  20037952 ns/op	    1343 B/op	      15 allocs/op
 BenchmarkNutsDBPutValue512B-16    	      62	  20090731 ns/op	    1754 B/op	      15 allocs/op
 
-BenchmarkFlashDBPutValue64B-16     	     105	  16154174 ns/op	     770 B/op	      18 allocs/op
-BenchmarkFlashDBPutValue128B-16    	      62	  21666543 ns/op	    1119 B/op	      18 allocs/op
-BenchmarkFlashDBPutValue256B-16    	      61	  18631201 ns/op	    1956 B/op	      18 allocs/op
-BenchmarkFlashDBPutValue512B-16    	      62	  20118103 ns/op	    3071 B/op	      18 allocs/op
+BenchmarkFlashDBPutValue64B-16     	      62	  18364330 ns/op	     692 B/op	      15 allocs/op
+BenchmarkFlashDBPutValue128B-16    	      64	  18315903 ns/op	    1015 B/op	      15 allocs/op
+BenchmarkFlashDBPutValue256B-16    	      64	  19250441 ns/op	    1694 B/op	      15 allocs/op
+BenchmarkFlashDBPutValue512B-16    	      61	  18811900 ns/op	    2976 B/op	      15 allocs/op
+BenchmarkFlashDBGet-16			    3599500	     340.7 ns/op	      32 B/op	       2 allocs/op
 
 PASS
 ok  	github.com/arriqaaq/flashbench	28.947s
