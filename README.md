@@ -113,7 +113,7 @@ To set a value you must open a read/write transaction:
 
 ```go
 err := db.Update(func(tx *flashdb.Tx) error {
-	_, _, err := tx.Set("mykey", "myvalue")
+	err := tx.Set("mykey", "myvalue")
 	return err
 })
 ```
