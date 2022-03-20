@@ -235,12 +235,10 @@ The benchmark code can be found here [flashdb-bench](https://github.com/arriqaaq
 TODO
 ====
 
-FlashDB is a toy db and in early stages of development. A couple of to-do tasks listed:
+FlashDB is in early stages of development. A couple of to-do tasks listed:
 
-- Add transaction to eviction to avoid locks
 - Add more comprehensive unit test cases
-- Add more bench tests
-- Add explicit logging messages
+- Add explicit documentation on various usecases
 
 
 References
