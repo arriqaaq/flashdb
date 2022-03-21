@@ -113,7 +113,7 @@ To set a value you must open a read/write transaction:
 
 ```go
 err := db.Update(func(tx *flashdb.Tx) error {
-	_, _, err := tx.Set("mykey", "myvalue")
+	err := tx.Set("mykey", "myvalue")
 	return err
 })
 ```
@@ -149,28 +149,6 @@ Commands
 |        |         |             | ZSCORERANGE    |
 |        |         |             | ZREVSCORERANGE |
 |        |         |             | ZCLEAR         |
-
-
-Setup
-=====
-
-<p align="center">
-<img
-    src="img/cli.png" alt="FlashDB">
-</p>
-
-
-Run the server
-```go
-go build -o bin/flashdb-server cmd/server/main.go
-```
-
-Run the client
-```go
-go build -o bin/flashdb-cli cmd/cli/main.go
-```
-
-
 
 Benchmarks
 ==========
