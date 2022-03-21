@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/arriqaaq/aol v0.1.2
-	github.com/arriqaaq/art v0.1.1
+	github.com/arriqaaq/art v0.1.2
 	github.com/arriqaaq/hash v0.1.2
 	github.com/arriqaaq/set v0.1.2
 	github.com/arriqaaq/zset v0.1.2
