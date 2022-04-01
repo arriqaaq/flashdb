@@ -1,13 +1,12 @@
 package flashdb
 
 import (
-	"reflect"
 	"time"
 )
 
 func (tx *Tx) HSet(key string, field string, value string) (res int, err error) {
 	existVal := tx.HGet(key, field)
-	if reflect.DeepEqual(existVal, value) {
+	if existVal == value {
 		return
 	}
 
