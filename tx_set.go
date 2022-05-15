@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+// SAdd adds one or more members to the set stored at key. If a member exists at
+// key, it is skipped.
 func (tx *Tx) SAdd(key string, members ...string) (err error) {
 	for _, m := range members {
 		exist := tx.db.setStore.SIsMember(key, m)
@@ -15,6 +17,8 @@ func (tx *Tx) SAdd(key string, members ...string) (err error) {
 	return
 }
 
+// SIsMember checks the member is a member of set stored at key. If the key has
+// expired, the key is evicted.
 func (tx *Tx) SIsMember(key string, member string) bool {
 	if tx.db.hasExpired(key, Set) {
 		tx.db.evict(key, Set)
@@ -23,6 +27,8 @@ func (tx *Tx) SIsMember(key string, member string) bool {
 	return tx.db.setStore.SIsMember(key, member)
 }
 
+// SRandMember returns random elements stored at key. If the key has expired,
+// the key is evicted.
 func (tx *Tx) SRandMember(key string, count int) (values []string) {
 	if tx.db.hasExpired(key, Set) {
 		tx.db.evict(key, Set)
@@ -36,6 +42,9 @@ func (tx *Tx) SRandMember(key string, count int) (values []string) {
 	return
 }
 
+// SRem removes one or more members from the set stored at key. It returns
+// number of removed members from the set. If the key has expired, the key
+// is evicted.
 func (tx *Tx) SRem(key string, members ...string) (res int, err error) {
 	if tx.db.hasExpired(key, Set) {
 		tx.db.evict(key, Set)
@@ -50,6 +59,8 @@ func (tx *Tx) SRem(key string, members ...string) (res int, err error) {
 	return
 }
 
+// SMove moves a member from src to dst.  If both keys have expired, the key is
+// evicted.
 func (tx *Tx) SMove(src, dst string, member string) error {
 	if tx.db.hasExpired(src, Set) {
 		tx.db.evict(src, Hash)
@@ -68,6 +79,8 @@ func (tx *Tx) SMove(src, dst string, member string) error {
 	return nil
 }
 
+// SCard returns the cardinality of the set stored at key. If the key has expired,
+// the key is evicted.
 func (tx *Tx) SCard(key string) int {
 	if tx.db.hasExpired(key, Set) {
 		tx.db.evict(key, Set)
@@ -76,6 +89,8 @@ func (tx *Tx) SCard(key string) int {
 	return tx.db.setStore.SCard(key)
 }
 
+// SMembers returns the members stored at key. If the key has expired, the key
+// is evicted.
 func (tx *Tx) SMembers(key string) (values []string) {
 	if tx.db.hasExpired(key, Set) {
 		tx.db.evict(key, Set)
@@ -89,6 +104,8 @@ func (tx *Tx) SMembers(key string) (values []string) {
 	return
 }
 
+// SUnion returns the members of the set resulting from union of all the given
+// keys. The members' type is string. If any key has expired, the key is evicted.
 func (tx *Tx) SUnion(keys ...string) (values []string) {
 	var activeKeys []string
 	for _, k := range keys {
@@ -106,6 +123,8 @@ func (tx *Tx) SUnion(keys ...string) (values []string) {
 	return
 }
 
+// SDiff returns the members if the set resulting from difference between the
+// first and all the remaining keys. If any key has expired, the key is evicted.
 func (tx *Tx) SDiff(keys ...string) (values []string) {
 	var activeKeys []string
 	for _, k := range keys {
