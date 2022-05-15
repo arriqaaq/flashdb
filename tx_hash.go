@@ -97,7 +97,7 @@ func (tx *Tx) HKeys(key string) (val []string) {
 	return tx.db.hashStore.HKeys(key)
 }
 
-// HVals returns all of values stored at key. If the key has expired, the key
+// HVals returns all values stored at key. If the key has expired, the key
 // is evicted.
 func (tx *Tx) HVals(key string) (values []string) {
 	if tx.db.hasExpired(key, Hash) {
