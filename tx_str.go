@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Set saves a key-value pair.
 func (tx *Tx) Set(key string, value string) error {
 	e := newRecord([]byte(key), []byte(value), StringRecord, StringSet)
 	tx.addRecord(e)
@@ -11,6 +12,7 @@ func (tx *Tx) Set(key string, value string) error {
 	return nil
 }
 
+// SetEx sets key-value pair with given duration time for expiration.
 func (tx *Tx) SetEx(key string, value string, duration int64) (err error) {
 	if duration <= 0 {
 		return ErrInvalidTTL
@@ -23,6 +25,7 @@ func (tx *Tx) SetEx(key string, value string, duration int64) (err error) {
 	return
 }
 
+// Get returns value of the given key. It may return error if something goes wrong.
 func (tx *Tx) Get(key string) (val string, err error) {
 	val, err = tx.get(key)
 	if err != nil {
@@ -32,6 +35,7 @@ func (tx *Tx) Get(key string) (val string, err error) {
 	return
 }
 
+// Delete deletes the given key.
 func (tx *Tx) Delete(key string) error {
 	e := newRecord([]byte(key), nil, StringRecord, StringRem)
 	tx.addRecord(e)
@@ -39,6 +43,7 @@ func (tx *Tx) Delete(key string) error {
 	return nil
 }
 
+// Expire adds a expiration time period to the given key.
 func (tx *Tx) Expire(key string, duration int64) (err error) {
 	if duration <= 0 {
 		return ErrInvalidTTL
@@ -55,6 +60,7 @@ func (tx *Tx) Expire(key string, duration int64) (err error) {
 	return
 }
 
+// TTL returns remaining time of the expiration.
 func (tx *Tx) TTL(key string) (ttl int64) {
 	deadline := tx.db.getTTL(String, key)
 	if deadline == nil {
@@ -69,6 +75,8 @@ func (tx *Tx) TTL(key string) (ttl int64) {
 	return deadline.(int64) - time.Now().Unix()
 }
 
+// Exists checks the given key whether exists. Also, if the key is expired,
+// the key is evicted and return false.
 func (tx *Tx) Exists(key string) bool {
 	_, err := tx.db.strStore.get(key)
 	if err != nil {
@@ -81,6 +89,7 @@ func (tx *Tx) Exists(key string) bool {
 	return true
 }
 
+// get is a helper method for retrieving value of the given key from the database.
 func (tx *Tx) get(key string) (val string, err error) {
 	v, err := tx.db.strStore.get(key)
 	if err != nil {
